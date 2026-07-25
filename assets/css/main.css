@@ -1,0 +1,888 @@
+/* Fallback invitation theme tokens. Real templates override these inline per
+   themeTokens (see templates/theme/tokens.ts, added in Phase 1). */
+:root {
+  --invite-accent: #8b2942;
+  --invite-accent-soft: #f5dbe1;
+  --invite-accent-secondary: #c98a3e;
+  --invite-ink: #201014;
+  --invite-muted: #6b5a5f;
+}
+
+/* ---- App chrome design tokens (rem-based) --------------------------------
+   Everything below styles the editor/dashboard chrome only, scoped under
+   `.v-application` -- never the invitation render tree, which uses its own
+   tokens above and Tailwind classes, not these. */
+:root {
+  --app-font-body: 'Inter', 'Noto Sans Khmer', sans-serif;
+  --app-font-display: 'Plus Jakarta Sans', 'Noto Sans Khmer', sans-serif;
+
+  /* One consistent radius scale instead of ad hoc per-component values. */
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 624.9375rem; /* effectively a pill/circle at any size */
+
+  --motion-fast: 180ms;
+  --motion-base: 320ms;
+  --motion-slow: 600ms;
+  --motion-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --app-gradient: linear-gradient(135deg, #4a1020 0%, #8b2942 52%, #c98a3e 100%);
+  --app-background: linear-gradient(135deg, #fff9f6 0%, #fdf1ec 48%, #fbe8e4 100%);
+
+  /* Glassmorphism: translucent surface + blur + a hairline border for edge
+     definition, deliberately NOT a drop shadow -- shadows read as a dated
+     skeuomorphic cue next to this, blur+translucency does the "depth" work
+     instead. */
+  --glass-bg: rgb(255 255 255 / 60%);
+  --glass-bg-strong: rgb(255 255 255 / 78%);
+  --glass-border: rgb(255 255 255 / 60%);
+  --glass-blur: 1rem;
+  --scrim-bg: rgb(74 16 32 / 32%);
+  --scrim-blur: 0.5rem;
+  --glass-shadow: 0 1rem 2.5rem rgb(32 16 20 / 8%);
+  --glass-shadow-subtle: 0 0.5rem 1.5rem rgb(32 16 20 / 6%);
+  --accordion-shadow:
+    0 1.25rem 2.5rem rgb(139 41 66 / 9%),
+    0 0.375rem 1rem rgb(32 16 20 / 4%),
+    inset 0 0.0625rem 0 rgb(255 255 255 / 58%);
+  --glass-field-bg: rgb(255 255 255 / 70%);
+  --glass-field-bg-hover: rgb(255 255 255 / 84%);
+  /* Repeated controls use an almost-opaque glass tint without live backdrop
+     blur. The visual hierarchy stays soft while large forms and galleries
+     avoid creating a separate GPU-filtered layer for every item. */
+  --flat-glass-bg: rgb(255 255 255 / 90%);
+  --flat-glass-bg-hover: rgb(255 255 255 / 97%);
+  --flat-glass-border: rgb(139 41 66 / 9%);
+  --scrollbar-handle: rgb(139 41 66 / 35%);
+  --scrollbar-handle-hover: rgb(139 41 66 / 52%);
+  --scrollbar-handle-active: rgb(139 41 66 / 68%);
+}
+.v-theme--tiepSnaeDark,
+html[data-app-theme='dark'] {
+  --app-gradient: linear-gradient(135deg, #5c1a2e 0%, #a13a58 52%, #e0b062 100%);
+  --app-background: linear-gradient(135deg, #1c1014 0%, #170b10 48%, #200e14 100%);
+  --glass-bg: rgb(20 10 14 / 60%);
+  --glass-bg-strong: rgb(28 14 20 / 80%);
+  --glass-border: rgb(255 255 255 / 8%);
+  --scrim-bg: rgb(0 0 0 / 42%);
+  --glass-shadow: 0 1rem 2.75rem rgb(0 0 0 / 28%);
+  --glass-shadow-subtle: 0 0.5rem 1.5rem rgb(0 0 0 / 20%);
+  --accordion-shadow:
+    0 1.25rem 2.75rem rgb(0 0 0 / 32%),
+    0 0.375rem 1rem rgb(0 0 0 / 18%),
+    inset 0 0.0625rem 0 rgb(255 255 255 / 8%);
+  --glass-field-bg: rgb(255 255 255 / 7%);
+  --glass-field-bg-hover: rgb(255 255 255 / 11%);
+  --flat-glass-bg: rgb(28 14 20 / 92%);
+  --flat-glass-bg-hover: rgb(36 20 27 / 97%);
+  --flat-glass-border: rgb(255 255 255 / 10%);
+  --scrollbar-handle: rgb(232 160 180 / 35%);
+  --scrollbar-handle-hover: rgb(232 160 180 / 52%);
+  --scrollbar-handle-active: rgb(232 160 180 / 68%);
+}
+
+/* The prerendered app is intentionally emitted with Vuetify's light theme so
+   its HTML is deterministic. When the blocking head script (see app.vue)
+   detects a saved dark preference (or a dark OS preference), these overrides
+   make that SSR markup visually identical to the real dark theme on the very
+   first paint. Vuetify replaces the light classes during hydration. */
+html[data-app-theme='light'] {
+  color-scheme: light;
+  background-color: #fff9f6;
+}
+
+html[data-app-theme='dark'] {
+  color-scheme: dark;
+  background-color: #170b10;
+}
+
+/* Minimal, framework-agnostic reset. Deliberately not Tailwind's preflight
+   (disabled in tailwind.config.ts) since that would strip Vuetify's own
+   element defaults inside .v-application. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#__nuxt {
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+/* Route changes are deliberately short and low-distance: enough to preserve
+   spatial context without making common navigation feel delayed. */
+.page-enter-active {
+  transition: opacity var(--motion-base) var(--motion-ease-out), transform var(--motion-base) var(--motion-ease-out);
+}
+.page-leave-active {
+  transition: opacity var(--motion-fast) ease, transform var(--motion-fast) ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(0.625rem) scale(0.995);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-0.25rem);
+}
+
+/* The View Transitions API gives theme and locale changes a seamless full-app
+   transition. The html classes below provide a small fallback on browsers
+   that do not support it yet. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 420ms;
+  animation-timing-function: var(--motion-ease-out);
+  mix-blend-mode: normal;
+}
+
+html[data-ui-transition='theme']::view-transition-old(root) {
+  animation: none;
+}
+html[data-ui-transition='theme']::view-transition-new(root) {
+  animation-name: theme-circle-reveal;
+}
+html[data-ui-transition='language']::view-transition-old(root) {
+  animation-name: language-slide-out;
+}
+html[data-ui-transition='language']::view-transition-new(root) {
+  animation-name: language-slide-in;
+}
+
+html.ui-theme-switch .v-application,
+html.ui-language-switch .v-application {
+  animation: ui-switch-fallback 420ms var(--motion-ease-out);
+}
+
+@keyframes theme-circle-reveal {
+  from { clip-path: circle(0 at calc(100% - 2.5rem) 3.5rem); }
+  to { clip-path: circle(140vmax at calc(100% - 2.5rem) 3.5rem); }
+}
+@keyframes language-slide-out {
+  to { opacity: 0; transform: translateY(-0.375rem); }
+}
+@keyframes language-slide-in {
+  from { opacity: 0; transform: translateY(0.375rem); }
+}
+@keyframes ui-switch-fallback {
+  45% { opacity: 0.72; transform: translateY(-0.125rem); }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 0.0625rem;
+  height: 0.0625rem;
+  padding: 0;
+  margin: -0.0625rem;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.v-application {
+  position: relative;
+  background: var(--app-background) !important;
+  background-attachment: fixed;
+}
+.v-application::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(115deg, rgb(139 41 66 / 10%), transparent 36%, rgb(201 138 62 / 8%) 72%, transparent);
+  pointer-events: none;
+}
+.v-theme--tiepSnaeDark.v-application::before,
+html[data-app-theme='dark'] .v-application::before {
+  background: linear-gradient(115deg, rgb(232 160 180 / 12%), transparent 38%, rgb(240 200 120 / 8%) 74%, transparent);
+}
+
+/* Fluid container padding: scales smoothly with viewport width instead of
+   jumping at Vuetify's fixed breakpoints. */
+.v-application .v-container {
+  padding-left: clamp(1rem, 0.6rem + 2vw, 2.5rem);
+  padding-right: clamp(1rem, 0.6rem + 2vw, 2.5rem);
+}
+
+/* Custom-scrollbar tokens, consumed by composables/useOverlayScrollbars.ts
+   wherever a scrollable pane opts in. */
+.v-application .os-theme-invite {
+  --os-size: 0.625rem;
+  --os-padding-perpendicular: 0.125rem;
+  --os-padding-axis: 0.125rem;
+  --os-track-border-radius: var(--radius-full);
+  --os-handle-border-radius: var(--radius-full);
+  --os-handle-interactive-area-offset: 0.25rem;
+  --os-handle-min-size: 2rem;
+  --os-handle-bg: var(--scrollbar-handle);
+  --os-handle-bg-hover: var(--scrollbar-handle-hover);
+  --os-handle-bg-active: var(--scrollbar-handle-active);
+}
+
+/* App chrome font pair: Plus Jakarta Sans for headings/actions and Inter for
+   dense interface text. Vuetify's compiled `text-*` helpers explicitly name
+   Roboto, so each helper used by the app is overridden here with one extra
+   class of specificity. No `!important`: inline invitation font variables
+   retain priority inside the editor preview and the shared invitation page. */
+html,
+body {
+  font-family: var(--app-font-body);
+}
+
+.v-application {
+  font-family: var(--app-font-body);
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.v-application h1,
+.v-application h2,
+.v-application h3,
+.v-application h4,
+.v-application h5,
+.v-application h6,
+.v-application .text-h1,
+.v-application .text-h2,
+.v-application .text-h3,
+.v-application .text-h4,
+.v-application .text-h5,
+.v-application .text-h6,
+.v-application .text-subtitle-1,
+.v-application .text-subtitle-2,
+.v-application .v-btn,
+.v-application .v-tab,
+.v-application .v-toolbar-title,
+.v-application .v-card-title {
+  font-family: var(--app-font-display);
+  letter-spacing: normal;
+}
+
+.v-application .text-body-1,
+.v-application .text-body-2,
+.v-application .text-caption,
+.v-application .text-overline,
+.v-application .text-button {
+  font-family: var(--app-font-body);
+}
+
+html[lang='km'] .v-application {
+  font-synthesis: none;
+}
+
+html[lang='km'] .v-application .v-field__input,
+html[lang='km'] .v-application .v-label,
+html[lang='km'] .v-application .v-btn__content,
+html[lang='km'] .v-application .v-tab {
+  line-height: 1.5;
+}
+
+.v-overlay .v-selection-control {
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+/* Fluid page-title sizing (dashboard/gallery/settings page headers) instead
+   of a single fixed size that feels oversized on narrow viewports and
+   undersized on wide ones. */
+.v-application .text-h4 {
+  font-size: clamp(1.5rem, 1.15rem + 1.4vw, 2.125rem);
+}
+
+/* ---- Glassmorphism surfaces ---------------------------------------------
+   One utility class, applied via Vuetify component defaults
+   (plugins/vuetify.ts) rather than repeated per usage. */
+.v-application .glass-surface {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 0.0625rem solid var(--glass-border);
+  border-radius: var(--radius-xl) !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+
+.v-application .app-navbar-shell {
+  width: calc(100% - clamp(1rem, 1.6vw, 1.75rem));
+  max-width: none;
+  min-height: 3rem;
+  margin: 0.5rem auto;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  padding-left: 0.75rem;
+  padding-right: 0.5rem;
+}
+
+.v-application .app-navbar-logo {
+  display: block;
+  width: 1.875rem;
+  height: 1.875rem;
+  filter: drop-shadow(0 0.3rem 0.6rem rgb(139 41 66 / 30%));
+  transition: transform var(--motion-base) var(--motion-ease-out), filter var(--motion-base) ease;
+}
+
+.v-application a:hover .app-navbar-logo {
+  filter: drop-shadow(0 0.45rem 0.8rem rgb(201 138 62 / 38%));
+  transform: translateY(-0.0625rem) rotate(-3deg) scale(1.05);
+}
+
+.v-application .app-main {
+  /* Vuetify's layout registry is 0px during SSR and updates to the app-bar
+     height after hydration. A stable explicit offset prevents that update
+     from shifting the entire page. */
+  padding-top: 4.5rem !important;
+}
+
+.v-application .app-main--with-mobile-nav {
+  padding-bottom: calc(5.25rem + env(safe-area-inset-bottom, 0rem)) !important;
+}
+
+.v-application .app-mobile-nav {
+  position: fixed;
+  left: 50%;
+  bottom: calc(0.75rem + env(safe-area-inset-bottom, 0rem));
+  z-index: 1006;
+  display: flex;
+  width: min(34rem, calc(100vw - 1.5rem));
+  padding: 0.25rem;
+  transform: translateX(-50%);
+}
+
+.v-application .app-mobile-nav__button {
+  flex: 1 1 0;
+  min-width: 0 !important;
+  height: 3.5rem !important;
+}
+
+.v-application .app-mobile-nav__button .v-btn__content {
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.v-application .app-mobile-nav__label {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 37.5rem) {
+  .v-application .app-main--with-mobile-nav {
+    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0rem)) !important;
+  }
+
+  .v-application .app-mobile-nav {
+    bottom: calc(0.5rem + env(safe-area-inset-bottom, 0rem));
+    width: calc(100vw - 1rem);
+    padding: 0.1875rem;
+  }
+
+  .v-application .app-mobile-nav__button {
+    height: 3.125rem !important;
+    padding-inline: 0.25rem !important;
+  }
+
+  .v-application .app-mobile-nav__button .v-icon {
+    font-size: 1rem !important;
+  }
+
+  .v-application .app-mobile-nav__label {
+    font-size: 0.625rem;
+    line-height: 0.8125rem;
+  }
+}
+
+.v-application .v-card,
+.v-application .v-list,
+.v-application .v-overlay__content,
+.v-application .v-alert {
+  border-radius: var(--radius-xl) !important;
+}
+
+.v-list-subheader {
+  background: transparent !important;
+}
+
+.v-application .v-list,
+body > .v-overlay-container .v-list {
+  padding: 0.5rem !important;
+}
+
+.v-application .v-list-item,
+body > .v-overlay-container .v-list-item {
+  border-radius: 1rem !important;
+}
+
+.v-application .v-overlay__content {
+  overflow: hidden;
+  box-shadow: var(--glass-shadow-subtle) !important;
+}
+
+.v-application .v-overlay__content > .v-list,
+.v-application .v-overlay__content > .v-card {
+  border-radius: inherit !important;
+  overflow: hidden;
+}
+
+body > .v-overlay-container .v-overlay__content {
+  border-radius: var(--radius-xl) !important;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow-subtle) !important;
+}
+
+/* Keep the scrim itself fully opaque and put its transparency in the
+   background color. Vuetify's default element opacity would also fade the
+   backdrop-filter result, making the blur barely visible. */
+.v-overlay-container .v-overlay__scrim {
+  background: var(--scrim-bg) !important;
+  opacity: 1 !important;
+  backdrop-filter: blur(var(--scrim-blur)) saturate(85%);
+  -webkit-backdrop-filter: blur(var(--scrim-blur)) saturate(85%);
+}
+
+body > .v-overlay-container .v-overlay__content > .v-list,
+body > .v-overlay-container .v-overlay__content > .v-card {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 0.0625rem solid var(--glass-border);
+  border-radius: inherit !important;
+  overflow: hidden;
+  box-shadow: none !important;
+}
+
+.v-application .rounded-lg {
+  border-radius: var(--radius-lg) !important;
+}
+.v-application .rounded-xl {
+  border-radius: var(--radius-xl) !important;
+}
+
+.v-application .v-expansion-panels,
+.v-application .v-expansion-panel {
+  box-shadow: none !important;
+}
+.v-application .v-expansion-panels {
+  background: var(--flat-glass-bg);
+  border-radius: var(--radius-xl);
+  border: 0.0625rem solid var(--flat-glass-border);
+  box-shadow: var(--accordion-shadow) !important;
+  overflow: hidden;
+}
+.v-application .v-expansion-panel {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 14%), transparent 44%),
+    var(--flat-glass-bg) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0;
+  border-radius: 0 !important;
+}
+.v-application .v-expansion-panel + .v-expansion-panel {
+  border-top: 0.0625rem solid var(--flat-glass-border);
+}
+.v-theme--tiepSnaeDark .v-expansion-panel,
+html[data-app-theme='dark'] .v-expansion-panel {
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 5%), transparent 48%),
+    var(--flat-glass-bg) !important;
+}
+
+.v-application .v-field--variant-solo-filled {
+  background: var(--flat-glass-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 0.0625rem solid transparent;
+  box-shadow: none;
+}
+.v-application .v-field--variant-solo-filled:hover,
+.v-application .v-field--variant-solo-filled.v-field--focused {
+  background: var(--flat-glass-bg-hover);
+  border-color: var(--flat-glass-border);
+}
+
+.v-application .v-field,
+.v-application .v-btn:not(.v-btn--icon),
+.v-application .v-chip {
+  border-radius: var(--radius-lg) !important;
+}
+
+.v-application .v-btn--icon,
+.v-application .v-avatar,
+.v-application .v-chip.v-chip--pill {
+  border-radius: var(--radius-full) !important;
+}
+
+.v-application .app-header-icon-btn {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  min-width: 2.25rem !important;
+  padding: 0 !important;
+}
+
+/* ---- Template gallery (masonry) ------------------------------------------
+   Shared by pages/templates/index.vue -- see components/gallery/*. */
+.v-application .template-masonry {
+  column-count: 1;
+  column-gap: 1rem;
+}
+
+.v-application .template-masonry-item {
+  display: inline-block;
+  width: 100%;
+  margin-bottom: 1rem;
+  break-inside: avoid;
+}
+
+.v-application .template-card {
+  height: max-content;
+  overflow: hidden;
+}
+
+.v-application .template-thumbnail {
+  overflow: hidden;
+  max-height: clamp(17rem, 36vw, 21.25rem);
+  margin: 0.75rem;
+  border-radius: var(--radius-lg);
+  background: var(--glass-field-bg);
+  border: 0.0625rem solid var(--glass-border);
+}
+
+@media (min-width: 37.5rem) {
+  .v-application .template-masonry {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 80rem) {
+  .v-application .template-masonry {
+    column-count: 3;
+  }
+}
+
+/* Clickable cards (dashboard invitation tiles, template gallery) get a hover
+   state that leans into the glass -- brighter/more opaque surface and a
+   subtle lift -- instead of a drop shadow. */
+.v-application .invite-card-interactive {
+  background: var(--flat-glass-bg) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: var(--flat-glass-border);
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+.v-application .invite-card-interactive:hover {
+  background: var(--flat-glass-bg-hover) !important;
+  border-color: rgb(var(--v-theme-primary));
+  transform: translateY(-0.1875rem);
+}
+
+/* High-value creation actions announce themselves once on entry, then settle
+   down to the normal button hover behavior. */
+.v-application .attention-cta {
+  animation:
+    important-content-enter var(--motion-slow) var(--motion-ease-out) both,
+    important-content-glow 1.4s 650ms ease-in-out 2 alternate;
+}
+.v-application .attention-cta .v-icon {
+  animation: important-icon-pop 520ms 240ms var(--motion-ease-out) both;
+}
+
+@keyframes important-content-enter {
+  from { opacity: 0; transform: translateY(0.5rem) scale(0.96); }
+}
+@keyframes important-content-glow {
+  to { box-shadow: 0 0.65rem 1.75rem rgba(var(--v-theme-primary), 0.24); }
+}
+@keyframes important-icon-pop {
+  50% { transform: rotate(8deg) scale(1.2); }
+}
+
+/* Primary buttons/chips/etc. get the brand gradient instead of a flat fill --
+   applied once, systematically, via Vuetify's own `.bg-primary` utility
+   class. Tailwind's `theme.extend.colors` (tailwind.config.ts) never defines
+   a `primary` color, so this class can only ever come from Vuetify, never
+   from anything in the invitation render tree -- safe to target broadly. */
+.v-application .bg-primary {
+  background: var(--app-gradient) !important;
+}
+.v-application .v-btn.bg-primary:hover {
+  filter: brightness(1.08);
+}
+
+/* Gradient wordmark -- used by layouts/default.vue's nav logo. */
+.v-application .gradient-text {
+  background: var(--app-gradient);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---- Motion language for AI features (Phase 3) ---------------------------
+   The continuous animated border is reserved for the main assistant surface;
+   smaller AI actions share a subtler tint and sparkling icon. */
+@property --gradient-border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.v-application .gradient-border-loop {
+  position: relative;
+  border-color: rgba(var(--v-theme-primary), 0.32) !important;
+}
+.v-application .gradient-border-loop::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  padding: 0.125rem;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--gradient-border-angle),
+    transparent 0deg 55deg,
+    #f0c878 88deg,
+    #c98a3e 120deg,
+    #8b2942 154deg,
+    transparent 196deg 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: gradient-border-spin 4.5s linear infinite;
+}
+
+.v-application .ai-feature-card {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(var(--v-theme-primary), 0.12), transparent 36%),
+    var(--glass-bg) !important;
+}
+.v-application .ai-feature-heading {
+  position: relative;
+  z-index: 3;
+}
+.v-application .ai-orbit-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: rgb(var(--v-theme-primary));
+  border: 0.0625rem solid rgba(var(--v-theme-primary), 0.22);
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgba(var(--v-theme-primary), 0.16), rgb(240 200 120 / 12%));
+  box-shadow: 0 0.35rem 1rem rgba(var(--v-theme-primary), 0.14);
+  animation: ai-orbit-pulse 2.8s ease-in-out infinite;
+  will-change: transform;
+}
+
+.v-application .ai-feature-tab .ai-spark-icon {
+  color: rgb(var(--v-theme-primary));
+  animation: ai-spark-twinkle 2.4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+.v-application .ai-feature-dot {
+  position: relative;
+  display: inline-block;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: var(--radius-full);
+  background: #22c55e;
+}
+.v-application .ai-feature-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgb(34 197 94 / 45%);
+  animation: ai-live-pulse 2s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+.v-application .v-btn.ai-action-button {
+  position: relative;
+  overflow: hidden;
+  border: 0.0625rem solid rgba(var(--v-theme-primary), 0.2);
+  background:
+    linear-gradient(110deg, rgba(var(--v-theme-primary), 0.1), rgb(240 200 120 / 9%), rgba(var(--v-theme-primary), 0.1)) !important;
+  color: rgb(var(--v-theme-primary));
+}
+.v-application .v-btn.ai-action-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 18%,
+    rgba(var(--v-theme-primary), 0.12) 43%,
+    rgb(240 200 120 / 15%) 52%,
+    transparent 78%
+  );
+  transform: translateX(-120%);
+  animation: ai-action-shimmer 4.5s ease-in-out infinite;
+  will-change: transform;
+}
+.v-application .v-btn.ai-action-button .v-btn__content {
+  position: relative;
+  z-index: 1;
+}
+.v-application .v-btn.ai-action-button:hover {
+  border-color: rgba(var(--v-theme-primary), 0.52);
+  transform: translateY(-0.0625rem);
+}
+.v-application .v-btn.ai-action-button .v-icon {
+  animation: ai-spark-twinkle 2.4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.v-application .ai-chat-entry {
+  animation: ai-message-enter var(--motion-base) var(--motion-ease-out) both;
+}
+
+.panel-swap-enter-active,
+.panel-swap-leave-active {
+  transition: opacity 220ms var(--motion-ease-out), transform 220ms var(--motion-ease-out);
+}
+.panel-swap-enter-from {
+  opacity: 0;
+  transform: translateX(0.5rem);
+}
+.panel-swap-leave-to {
+  opacity: 0;
+  transform: translateX(-0.375rem);
+}
+
+.v-application .ui-theme-toggle .v-icon,
+.v-application .ui-language-toggle .v-list-item__append {
+  transition: transform var(--motion-base) var(--motion-ease-out);
+}
+.v-application .ui-theme-toggle:hover .v-icon {
+  transform: rotate(18deg) scale(1.08);
+}
+.v-application .ui-language-toggle:hover .v-list-item__append {
+  transform: translateX(0.1875rem);
+}
+
+@keyframes gradient-border-spin {
+  to { --gradient-border-angle: 360deg; }
+}
+@keyframes ai-orbit-pulse {
+  50% { transform: translateY(-0.125rem) rotate(5deg) scale(1.04); }
+}
+@keyframes ai-spark-twinkle {
+  50% { opacity: 0.72; transform: rotate(10deg) scale(1.12); }
+}
+@keyframes ai-live-pulse {
+  0% { opacity: 0.55; transform: scale(1); }
+  70%, 100% { opacity: 0; transform: scale(2.8); }
+}
+@keyframes ai-action-shimmer {
+  0%, 24%, 100% { transform: translateX(-120%); }
+  58%, 72% { transform: translateX(120%); }
+}
+@keyframes ai-message-enter {
+  from { opacity: 0; transform: translateY(0.375rem) scale(0.99); }
+}
+
+/* Empty-state icon: soft gradient-tinted disc behind the outline icon
+   instead of a plain grey icon floating on the page background. */
+.v-application .invite-empty-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, rgb(139 41 66 / 14%) 0%, rgb(201 138 62 / 13%) 100%);
+}
+.v-theme--tiepSnaeDark .invite-empty-icon-badge,
+html[data-app-theme='dark'] .invite-empty-icon-badge {
+  background: linear-gradient(135deg, rgb(232 160 180 / 20%) 0%, rgb(240 200 120 / 17%) 100%);
+}
+
+/* Template tag/category chips: capitalized via CSS (text-transform) rather
+   than duplicating title-cased copies of each tag string in
+   templates/*.ts -- the underlying tag values stay lowercase, which is what
+   the tag-filter equality checks compare against. */
+.v-application .invite-tag-chip {
+  text-transform: capitalize;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active,
+  .page-leave-active,
+  .panel-swap-enter-active,
+  .panel-swap-leave-active {
+    transition: none !important;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  html.ui-theme-switch .v-application,
+  html.ui-language-switch .v-application,
+  .v-application .attention-cta,
+  .v-application .attention-cta .v-icon,
+  .v-application .gradient-border-loop::before,
+  .v-application .ai-orbit-icon,
+  .v-application .ai-feature-tab .ai-spark-icon,
+  .v-application .ai-feature-dot,
+  .v-application .v-btn.ai-action-button,
+  .v-application .v-btn.ai-action-button .v-icon,
+  .v-application .ai-chat-entry {
+    animation: none !important;
+  }
+
+  .v-application .invite-card-interactive,
+  .v-application .app-navbar-logo,
+  .v-application .ui-theme-toggle .v-icon,
+  .v-application .ui-language-toggle .v-list-item__append {
+    transition: none !important;
+  }
+  .v-application .invite-card-interactive:hover,
+  .v-application a:hover .app-navbar-logo,
+  .v-application .v-btn.ai-action-button:hover,
+  .v-application .ui-theme-toggle:hover .v-icon,
+  .v-application .ui-language-toggle:hover .v-list-item__append {
+    transform: none;
+  }
+}
+
+/* ---- Keepsake print/PDF export ------------------------------------------
+   The shared invitation page (pages/i/[inviteId].vue) never mounts
+   .v-application at all, so there's no app chrome to hide here -- only the
+   invitation's own gradient background is worth flattening, since a printed
+   keepsake shouldn't burn ink on a full-bleed color wash, and anything
+   explicitly marked .no-print (the floating save/print button) shouldn't
+   appear in the output itself. */
+@media print {
+  html,
+  body {
+    background: white !important;
+  }
+  .invite-page {
+    background: white !important;
+    min-height: 0 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
