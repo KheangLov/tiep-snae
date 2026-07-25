@@ -13,8 +13,8 @@
    `.v-application` -- never the invitation render tree, which uses its own
    tokens above and Tailwind classes, not these. */
 :root {
-  --app-font-body: 'Inter', 'Noto Sans Khmer', sans-serif;
-  --app-font-display: 'Plus Jakarta Sans', 'Noto Sans Khmer', sans-serif;
+  --app-font-body: 'Noto Sans Khmer', system-ui, sans-serif;
+  --app-font-display: 'Noto Sans Khmer', system-ui, sans-serif;
 
   /* One consistent radius scale instead of ad hoc per-component values. */
   --radius-sm: 0.625rem;
@@ -234,11 +234,11 @@ html[data-app-theme='dark'] .v-application::before {
   --os-handle-bg-active: var(--scrollbar-handle-active);
 }
 
-/* App chrome font pair: Plus Jakarta Sans for headings/actions and Inter for
-   dense interface text. Vuetify's compiled `text-*` helpers explicitly name
-   Roboto, so each helper used by the app is overridden here with one extra
-   class of specificity. No `!important`: inline invitation font variables
-   retain priority inside the editor preview and the shared invitation page. */
+/* Noto Sans Khmer keeps the Khmer-first app chrome consistent and readable;
+   Latin text uses the system UI fallback without another font download.
+   Vuetify's compiled `text-*` helpers explicitly name Roboto, so each helper
+   used by the app is overridden here with one extra class of specificity. No
+   `!important`: invitation font variables retain priority in previews. */
 html,
 body {
   font-family: var(--app-font-body);

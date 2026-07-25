@@ -7,6 +7,8 @@ import { countdownParts, resolveEventDateTime } from '~/utils/countdown'
 const { t } = useAppI18n()
 const inviteListStore = useInviteListStore()
 
+definePageMeta({ layout: 'dashboard' })
+
 const now = ref(Date.now())
 let timer: ReturnType<typeof setInterval> | undefined
 
@@ -44,74 +46,204 @@ function remove(id: string) {
 </script>
 
 <template>
-  <v-container class="py-8" style="max-width: 64rem">
-    <div v-if="inviteListStore.entries.length === 0" class="d-flex flex-column align-center text-center py-12">
-      <span class="invite-empty-icon-badge mb-5" aria-hidden="true">
-        <v-icon icon="solar:hearts-linear" size="44" color="primary" />
+  <section class="dashboard-page">
+    <div v-if="inviteListStore.entries.length === 0" class="dashboard-empty">
+      <span class="dashboard-empty__icon" aria-hidden="true">
+        ♡
       </span>
-      <h1 class="text-h4 font-weight-bold mb-2">{{ t('nav.myInvitations') }}</h1>
-      <p class="text-body-1 text-medium-emphasis mb-6" style="max-width: 32rem">{{ t('app.tagline') }}</p>
-      <v-btn
+      <h1>{{ t('nav.myInvitations') }}</h1>
+      <p>{{ t('app.tagline') }}</p>
+      <NuxtLink
         to="/templates"
-        color="primary"
-        variant="flat"
-        size="large"
-        class="bg-primary attention-cta"
-        prepend-icon="solar:magic-stick-3-bold"
+        class="dashboard-primary-action attention-cta"
       >
         {{ t('nav.createNew') }}
-      </v-btn>
+      </NuxtLink>
     </div>
 
     <template v-else>
-      <div class="d-flex align-center justify-space-between mb-6 flex-wrap ga-2">
-        <h1 class="text-h4 font-weight-bold">{{ t('nav.myInvitations') }}</h1>
-        <v-btn to="/templates" color="primary" variant="flat" prepend-icon="solar:add-circle-bold" class="bg-primary">
+      <div class="dashboard-page__heading">
+        <h1>{{ t('nav.myInvitations') }}</h1>
+        <NuxtLink to="/templates" class="dashboard-primary-action">
           {{ t('nav.createNew') }}
-        </v-btn>
+        </NuxtLink>
       </div>
       <div class="invite-grid">
-        <v-card
+        <NuxtLink
           v-for="entry in inviteListStore.entries"
           :key="entry.id"
-          class="invite-card-interactive pa-4"
+          class="dashboard-invite-card invite-card-interactive"
           :to="`/editor/${entry.id}`"
         >
-          <div class="d-flex align-center justify-space-between ga-2">
-            <div class="min-width-0">
-              <p class="text-subtitle-1 font-weight-bold mb-1 text-truncate">{{ entry.name }}</p>
-              <p class="text-caption text-medium-emphasis mb-0">{{ formatDate(entry.updatedAt) }}</p>
+          <div class="dashboard-invite-card__top">
+            <div class="dashboard-invite-card__copy">
+              <strong>{{ entry.name }}</strong>
+              <small>{{ formatDate(entry.updatedAt) }}</small>
             </div>
-            <v-btn
-              icon="solar:trash-bin-minimalistic-linear"
-              variant="text"
-              size="small"
+            <button
+              type="button"
+              :aria-label="`Delete ${entry.name}`"
               @click.stop.prevent="remove(entry.id)"
-            />
+            >
+              ×
+            </button>
           </div>
-          <v-chip
+          <span
             v-if="countdownLabel(entry.eventDate, entry.eventTimeStart)"
-            size="small"
-            variant="tonal"
-            color="primary"
-            prepend-icon="solar:hourglass-line-linear"
-            class="mt-3"
+            class="dashboard-countdown"
           >
             {{ countdownLabel(entry.eventDate, entry.eventTimeStart) }}
-          </v-chip>
-        </v-card>
+          </span>
+        </NuxtLink>
       </div>
     </template>
-  </v-container>
+  </section>
 </template>
 
 <style scoped>
+.dashboard-page {
+  width: min(64rem, 100%);
+  padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 3vw, 2.5rem);
+  margin: 0 auto;
+}
+
+.dashboard-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(3rem, 10vw, 6rem) 1rem;
+  text-align: center;
+}
+
+.dashboard-empty__icon {
+  display: grid;
+  width: 5rem;
+  height: 5rem;
+  margin-bottom: 1.25rem;
+  place-items: center;
+  color: #8b2942;
+  font-size: 3rem;
+  background: rgb(139 41 66 / 10%);
+  border-radius: 1.5rem;
+}
+
+.dashboard-empty h1,
+.dashboard-page__heading h1 {
+  margin: 0;
+  font-size: clamp(1.65rem, 4vw, 2.25rem);
+  line-height: 1.35;
+}
+
+.dashboard-empty p {
+  max-width: 32rem;
+  margin: 0.75rem 0 1.5rem;
+  line-height: 1.7;
+  opacity: 0.68;
+}
+
+.dashboard-primary-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.75rem 1.25rem;
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+  background: var(--app-gradient);
+  border-radius: 999px;
+  box-shadow: 0 0.75rem 1.5rem rgb(74 16 32 / 18%);
+}
+
+.dashboard-page__heading {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
 .invite-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
   gap: 1rem;
 }
-.min-width-0 {
+
+.dashboard-invite-card {
+  display: block;
+  padding: 1rem;
+  color: inherit;
+  text-decoration: none;
+  background: var(--flat-glass-bg);
+  border: 0.0625rem solid var(--flat-glass-border);
+  border-radius: var(--radius-lg);
+}
+
+.dashboard-invite-card__top {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboard-invite-card__copy {
+  display: grid;
+  gap: 0.25rem;
   min-width: 0;
+}
+
+.dashboard-invite-card__copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-invite-card__copy small {
+  opacity: 0.62;
+}
+
+.dashboard-invite-card button {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  color: inherit;
+  font: inherit;
+  font-size: 1.35rem;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+}
+
+.dashboard-invite-card button:hover,
+.dashboard-invite-card button:focus-visible {
+  color: #8b2942;
+  background: rgb(139 41 66 / 10%);
+  outline: none;
+}
+
+.dashboard-countdown {
+  display: inline-flex;
+  padding: 0.35rem 0.65rem;
+  margin-top: 0.75rem;
+  color: #8b2942;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgb(139 41 66 / 10%);
+  border-radius: 999px;
+}
+
+@media (max-width: 37.5rem) {
+  .dashboard-page__heading {
+    align-items: flex-start;
+  }
+
+  .dashboard-page__heading .dashboard-primary-action {
+    min-height: 2.5rem;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.78rem;
+  }
 }
 </style>

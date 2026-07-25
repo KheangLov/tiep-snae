@@ -1,5 +1,9 @@
 import vuetify from 'vite-plugin-vuetify'
 
+const appCacheVersion = 'v2'
+const appCachePrefix = 'theap-snae'
+const appCacheName = (kind: string) => `${appCachePrefix}-${kind}-${appCacheVersion}`
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-07-04',
   // The public shell and shared invitations render on the server. Private
@@ -8,9 +12,21 @@ export default defineNuxtConfig({
   ssr: true,
   devtools: { enabled: false },
 
+  // Keep the SSR document small enough to paint quickly. Nuxt otherwise
+  // inlines Vuetify's complete base stylesheet into every HTML response;
+  // external, content-hashed styles can be downloaded in parallel and reused.
+  features: {
+    inlineStyles: false,
+  },
+
   modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss', '@vite-pwa/nuxt'],
 
   routeRules: {
+    '/**': {
+      // HTML is resolved fresh (or by the service worker's NetworkFirst
+      // strategy), while hashed build assets have their own immutable rule.
+      headers: { 'cache-control': 'private, no-cache, must-revalidate' },
+    },
     '/_nuxt/**': {
       headers: { 'cache-control': 'public, max-age=31536000, immutable' },
     },
@@ -20,12 +36,16 @@ export default defineNuxtConfig({
     '/sw.js': {
       headers: { 'cache-control': 'no-cache, no-store, must-revalidate' },
     },
+    '/sw-cache-cleanup.js': {
+      headers: { 'cache-control': 'no-cache, no-store, must-revalidate' },
+    },
     '/manifest.webmanifest': {
       headers: { 'cache-control': 'no-cache, must-revalidate' },
     },
   },
 
   nitro: {
+    compressPublicAssets: true,
     prerender: {
       routes: ['/offline/'],
     },
@@ -40,6 +60,10 @@ export default defineNuxtConfig({
       'icons/app-icon-512.png',
     ],
     client: {
+      // A small local plugin registers after first interaction or an idle
+      // grace period. This prevents the 3.6 MB offline precache from competing
+      // with the first visible render on a cold mobile connection.
+      registerPlugin: false,
       installPrompt: 'tiep-snae:pwa-install-dismissed',
       periodicSyncForUpdates: 60 * 60,
     },
@@ -81,20 +105,23 @@ export default defineNuxtConfig({
       cleanupOutdatedCaches: true,
       clientsClaim: true,
       skipWaiting: true,
+      navigationPreload: true,
+      importScripts: ['/sw-cache-cleanup.js'],
       // This is an SSR app, not a single-page app shell. Each route should
       // use its server response when online and its own cached response when
       // offline; unmatched routes fall back to the precached offline page.
       navigateFallback: null,
       globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+      globIgnores: ['sw-cache-cleanup.js'],
       additionalManifestEntries: [
-        { url: '/offline/', revision: 'offline-v1' },
+        { url: '/offline/', revision: `offline-${appCacheVersion}` },
       ],
       runtimeCaching: [
         {
           urlPattern: /^https?:\/\/[^/]+\/(?:$|templates(?:\/|$)|customize(?:\/|$)|editor(?:\/|$)|i(?:\/|$)|settings(?:\/|$)|offline(?:\/|$))/,
           handler: 'NetworkFirst',
           options: {
-            cacheName: 'theap-snae-pages-v1',
+            cacheName: appCacheName('pages'),
             networkTimeoutSeconds: 3,
             cacheableResponse: { statuses: [0, 200] },
             expiration: {
@@ -108,7 +135,7 @@ export default defineNuxtConfig({
           urlPattern: /\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?.*)?$/i,
           handler: 'CacheFirst',
           options: {
-            cacheName: 'theap-snae-images-v1',
+            cacheName: appCacheName('images'),
             cacheableResponse: { statuses: [0, 200] },
             expiration: {
               maxEntries: 100,
@@ -121,7 +148,7 @@ export default defineNuxtConfig({
           urlPattern: /\.(?:aac|flac|m4a|mp3|ogg|wav)(?:\?.*)?$/i,
           handler: 'CacheFirst',
           options: {
-            cacheName: 'theap-snae-audio-v1',
+            cacheName: appCacheName('audio'),
             cacheableResponse: { statuses: [0, 200] },
             expiration: {
               maxEntries: 12,
@@ -135,7 +162,7 @@ export default defineNuxtConfig({
           urlPattern: /\.(?:otf|ttf|woff2?)(?:\?.*)?$/i,
           handler: 'CacheFirst',
           options: {
-            cacheName: 'theap-snae-fonts-v1',
+            cacheName: appCacheName('fonts'),
             cacheableResponse: { statuses: [0, 200] },
             expiration: {
               maxEntries: 80,
@@ -147,7 +174,7 @@ export default defineNuxtConfig({
           urlPattern: /\.(?:css|js|mjs)(?:\?.*)?$/i,
           handler: 'StaleWhileRevalidate',
           options: {
-            cacheName: 'theap-snae-assets-v1',
+            cacheName: appCacheName('assets'),
             cacheableResponse: { statuses: [0, 200] },
             expiration: {
               maxEntries: 120,
@@ -166,12 +193,10 @@ export default defineNuxtConfig({
   // render tree (which intentionally never mounts inside <v-app> -- see
   // components/invite/TemplateRenderer.vue).
   css: [
-    'vuetify/styles',
-    // Inter (body) + Plus Jakarta Sans (headings/buttons/nav) are the app
-    // chrome's own font pair. Only the scripts used by the English/Khmer
-    // interface are loaded here to keep unrelated subsets out of every SSR
-    // document; invitation-only fonts load per-template instead (see
-    // components/invite/TemplateRenderer.vue).
+    // Invitation themes can still opt into these self-hosted Latin families.
+    // The app chrome itself uses Noto Sans Khmer so the default Khmer view
+    // needs only the three Khmer subsets used above the fold. Latin glyphs
+    // fall back to the local system font instead of downloading duplicates.
     '@fontsource/inter/latin-400.css',
     '@fontsource/inter/latin-500.css',
     '@fontsource/inter/latin-600.css',
@@ -180,12 +205,9 @@ export default defineNuxtConfig({
     '@fontsource/plus-jakarta-sans/latin-600.css',
     '@fontsource/plus-jakarta-sans/latin-700.css',
     '@fontsource/plus-jakarta-sans/latin-800.css',
-    '@fontsource/noto-sans-khmer/latin-400.css',
     '@fontsource/noto-sans-khmer/khmer-400.css',
     '@fontsource/noto-sans-khmer/khmer-500.css',
-    '@fontsource/noto-sans-khmer/latin-600.css',
     '@fontsource/noto-sans-khmer/khmer-600.css',
-    '@fontsource/noto-sans-khmer/latin-700.css',
     '@fontsource/noto-sans-khmer/khmer-700.css',
     '~/assets/css/main.css',
   ],
@@ -196,7 +218,10 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [
-      vuetify({ autoImport: true }),
+      vuetify({
+        autoImport: true,
+        styles: { configFile: 'assets/vuetify-settings.scss' },
+      }),
     ],
   },
 

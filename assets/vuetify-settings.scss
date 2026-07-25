@@ -1,0 +1,6 @@
+// The app uses its own light/dark theme colors. Excluding Vuetify's complete
+// Material palette removes hundreds of unused .bg-* and .text-* helpers while
+// retaining theme helpers such as .bg-primary and .text-error.
+@forward 'vuetify/settings' with (
+  $color-pack: false,
+);

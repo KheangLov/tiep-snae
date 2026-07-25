@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import 'vuetify/styles'
 import { computed, nextTick, onMounted, watch } from 'vue'
 import { useTheme, useDisplay } from 'vuetify'
 import { useRoute } from 'vue-router'

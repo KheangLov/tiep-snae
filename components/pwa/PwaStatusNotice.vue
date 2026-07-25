@@ -37,13 +37,13 @@ const noticeKind = computed<NoticeKind | null>(() => {
 const noticeCopy = computed(() => {
   switch (noticeKind.value) {
     case 'install':
-      return { icon: 'solar:download-square-linear', title: t('pwa.installTitle'), body: t('pwa.installBody') }
+      return { icon: '↓', title: t('pwa.installTitle'), body: t('pwa.installBody') }
     case 'update':
-      return { icon: 'solar:refresh-circle-linear', title: t('pwa.updateTitle'), body: t('pwa.updateBody') }
+      return { icon: '↻', title: t('pwa.updateTitle'), body: t('pwa.updateBody') }
     case 'offline-ready':
-      return { icon: 'solar:cloud-check-linear', title: t('pwa.offlineReadyTitle'), body: t('pwa.offlineReadyBody') }
+      return { icon: '✓', title: t('pwa.offlineReadyTitle'), body: t('pwa.offlineReadyBody') }
     case 'offline':
-      return { icon: 'solar:cloud-cross-linear', title: t('pwa.offlineTitle'), body: t('pwa.offlineBody') }
+      return { icon: '!', title: t('pwa.offlineTitle'), body: t('pwa.offlineBody') }
     default:
       return null
   }
@@ -92,37 +92,36 @@ onUnmounted(() => {
       aria-live="polite"
     >
       <span class="pwa-status-notice__icon" aria-hidden="true">
-        <v-icon :icon="noticeCopy.icon" size="22" />
+        {{ noticeCopy.icon }}
       </span>
       <span class="pwa-status-notice__copy">
         <strong>{{ noticeCopy.title }}</strong>
         <small>{{ noticeCopy.body }}</small>
       </span>
-      <v-btn
+      <button
         v-if="noticeKind === 'install'"
-        size="small"
-        color="primary"
-        variant="flat"
+        type="button"
+        class="pwa-status-notice__action"
         @click="installApp"
       >
         {{ t('pwa.install') }}
-      </v-btn>
-      <v-btn
+      </button>
+      <button
         v-else-if="noticeKind === 'update'"
-        size="small"
-        color="primary"
-        variant="flat"
+        type="button"
+        class="pwa-status-notice__action"
         @click="applyUpdate"
       >
         {{ t('pwa.update') }}
-      </v-btn>
-      <v-btn
-        icon="solar:close-circle-linear"
-        size="x-small"
-        variant="text"
+      </button>
+      <button
+        type="button"
+        class="pwa-status-notice__close"
         :aria-label="t('common.close')"
         @click="dismiss"
-      />
+      >
+        ×
+      </button>
     </aside>
   </Transition>
 </template>
@@ -151,6 +150,8 @@ onUnmounted(() => {
   color: rgb(var(--v-theme-primary));
   background: rgb(var(--v-theme-primary) / 10%);
   border-radius: 999px;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .pwa-status-notice__copy {
@@ -168,6 +169,39 @@ onUnmounted(() => {
   font-size: 0.68rem;
   line-height: 1.45;
   opacity: 0.68;
+}
+
+.pwa-status-notice__action,
+.pwa-status-notice__close {
+  display: inline-grid;
+  min-height: 2.25rem;
+  place-items: center;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+}
+
+.pwa-status-notice__action {
+  padding: 0.5rem 0.85rem;
+  color: white;
+  background: rgb(var(--v-theme-primary, 139 41 66));
+}
+
+.pwa-status-notice__close {
+  width: 2.25rem;
+  padding: 0;
+  color: inherit;
+  font-size: 1.15rem;
+  background: transparent;
+}
+
+.pwa-status-notice__action:focus-visible,
+.pwa-status-notice__close:focus-visible {
+  outline: 0.125rem solid currentColor;
+  outline-offset: 0.125rem;
 }
 
 .pwa-notice-enter-active,
@@ -195,12 +229,12 @@ onUnmounted(() => {
     width: auto;
   }
 
-  .pwa-status-notice > :deep(.v-btn:not(.v-btn--icon)) {
+  .pwa-status-notice__action {
     grid-column: 2;
     justify-self: start;
   }
 
-  .pwa-status-notice > :deep(.v-btn--icon) {
+  .pwa-status-notice__close {
     grid-column: 3;
     grid-row: 1;
   }
