@@ -1,4 +1,5 @@
 import type { InviteThemeTokens } from '~/templates/theme/tokens'
+import type { InviteLayoutShellId } from '~/types/template'
 
 export type InviteLanguage = 'km' | 'en' | 'bilingual'
 
@@ -125,6 +126,10 @@ export interface InviteData {
   createdAt: string
   updatedAt: string
   templateId: string
+  /** Optional for backwards compatibility with invitations created before
+   * layouts became independently customizable. The renderer falls back to
+   * the selected template's layout when this is absent. */
+  layoutId?: InviteLayoutShellId
   language: InviteLanguage
   couple: CoupleInfo
   hosts: HostEntry[]

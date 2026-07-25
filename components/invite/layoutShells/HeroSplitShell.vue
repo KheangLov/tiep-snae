@@ -18,7 +18,7 @@ const props = defineProps<{ invite: InviteData; template: InviteTemplateDefiniti
 </script>
 
 <template>
-  <InvitePage :effect-id="invite.themeTokens.effectId">
+  <InvitePage :effect-id="invite.themeTokens.effectId" :background-image="invite.backgroundImage">
     <InviteHeroSplit :invite="invite" :dark="template.tags.includes('dark')" :guest-name="guestName" />
     <!-- The Angkor Wat silhouette motif already renders large across the
          hero's own horizon (see InviteHeroSplit.vue) -- showing the small

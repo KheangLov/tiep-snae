@@ -30,7 +30,7 @@ const groupedSchedule = computed(() => {
 </script>
 
 <template>
-  <InvitePage :effect-id="invite.themeTokens.effectId">
+  <InvitePage :effect-id="invite.themeTokens.effectId" :background-image="invite.backgroundImage">
     <InviteHero :invite="invite" :guest-name="guestName" />
     <InviteMotifDivider :motif-id="invite.themeTokens.motifId" />
     <InviteMusicToggle v-if="invite.music.enabled && invite.music.trackUrl" :music="invite.music" :language="invite.language" />

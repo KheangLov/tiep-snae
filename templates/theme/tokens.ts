@@ -5,10 +5,7 @@ export type Density = 'compact' | 'comfortable' | 'spacious'
 
 /** An ambient animated overlay, distinct from `motifId` (a static
  * decorative divider) -- see components/invite/primitives/
- * InviteFallingParticles.vue. Template-preset only for now, not exposed in
- * the guided customizer or AI pairing dialog: it's a signature look tied to
- * specific templates rather than a universally mixable option like accent
- * color or font. */
+ * InviteFallingParticles.vue. */
 export type EffectId = 'none' | 'falling-leaves' | 'falling-hearts'
 
 export interface InviteThemeTokens {

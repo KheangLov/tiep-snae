@@ -17,7 +17,7 @@ defineProps<{ invite: InviteData; template: InviteTemplateDefinition; guestName?
 </script>
 
 <template>
-  <InvitePage :effect-id="invite.themeTokens.effectId">
+  <InvitePage :effect-id="invite.themeTokens.effectId" :background-image="invite.backgroundImage">
     <div class="stack-card stack-card--hero">
       <InviteHero :invite="invite" :guest-name="guestName" />
     </div>

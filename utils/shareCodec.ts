@@ -12,6 +12,7 @@ import { safeParseInviteData } from '~/utils/inviteSchema'
 interface SharePayload {
   v: 1
   templateId: string
+  layoutId?: InviteData['layoutId']
   name: string
   language: InviteData['language']
   couple: InviteData['couple']
@@ -33,6 +34,7 @@ function buildSharePayload(invite: InviteData): SharePayload {
   return {
     v: 1,
     templateId: invite.templateId,
+    layoutId: invite.layoutId,
     name: invite.name,
     language: invite.language,
     couple: invite.couple,
@@ -60,6 +62,7 @@ function sharePayloadToInvite(payload: SharePayload): InviteData {
     createdAt: now,
     updatedAt: now,
     templateId: payload.templateId,
+    layoutId: payload.layoutId,
     language: payload.language,
     couple: payload.couple,
     hosts: payload.hosts ?? [],

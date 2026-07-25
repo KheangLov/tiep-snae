@@ -33,16 +33,17 @@ import StoryAlbumShell from './layoutShells/StoryAlbumShell.vue'
 const props = defineProps<{ invite: InviteData; guestName?: string }>()
 
 const template = computed(() => getTemplateById(props.invite.templateId))
+const layout = computed(() => props.invite.layoutId ?? template.value?.layout)
 const themeStyle = computed(() => resolveThemeStyle(props.invite.themeTokens))
 </script>
 
 <template>
   <div v-if="template" class="invite-render-root" :style="themeStyle">
-    <ClassicPortraitShell v-if="template.layout === 'classic-portrait'" :invite="invite" :template="template" :guest-name="guestName" />
-    <HeroSplitShell v-else-if="template.layout === 'hero-split'" :invite="invite" :template="template" :guest-name="guestName" />
-    <TimelineScrollShell v-else-if="template.layout === 'timeline-scroll'" :invite="invite" :template="template" :guest-name="guestName" />
-    <CardStackShell v-else-if="template.layout === 'card-stack'" :invite="invite" :template="template" :guest-name="guestName" />
-    <CinematicScrollShell v-else-if="template.layout === 'cinematic-scroll'" :invite="invite" :template="template" :guest-name="guestName" />
-    <StoryAlbumShell v-else-if="template.layout === 'story-album'" :invite="invite" :template="template" :guest-name="guestName" />
+    <ClassicPortraitShell v-if="layout === 'classic-portrait'" :invite="invite" :template="template" :guest-name="guestName" />
+    <HeroSplitShell v-else-if="layout === 'hero-split'" :invite="invite" :template="template" :guest-name="guestName" />
+    <TimelineScrollShell v-else-if="layout === 'timeline-scroll'" :invite="invite" :template="template" :guest-name="guestName" />
+    <CardStackShell v-else-if="layout === 'card-stack'" :invite="invite" :template="template" :guest-name="guestName" />
+    <CinematicScrollShell v-else-if="layout === 'cinematic-scroll'" :invite="invite" :template="template" :guest-name="guestName" />
+    <StoryAlbumShell v-else-if="layout === 'story-album'" :invite="invite" :template="template" :guest-name="guestName" />
   </div>
 </template>

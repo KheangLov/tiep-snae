@@ -5,15 +5,19 @@ import { MOTIFS, type MotifId } from '~/templates/theme/motifs'
 const props = defineProps<{ modelValue: MotifId; accentColor: string }>()
 const emit = defineEmits<{ 'update:modelValue': [MotifId] }>()
 
-// Only motifs with a registered SVG component are offered -- the remaining
-// MotifId values (angkor-frieze, naga-scale, ...) exist as a forward-typed
-// vocabulary for Phase 4's remaining templates and aren't selectable yet.
+// Keep the plain "None" choice alongside every registered motif.
 const options = computed<MotifId[]>(() => ['none', ...(Object.keys(MOTIFS) as MotifId[])])
 
 const labels: Partial<Record<MotifId, string>> = {
   none: 'None',
   'phka-garland': 'Phka Garland',
   'botanical-sprig': 'Botanical Sprig',
+  'angkor-frieze': 'Angkor Frieze',
+  'naga-scale': 'Naga Scale',
+  'silk-hol': 'Silk Hol',
+  sunburst: 'Art Deco Sun',
+  'watercolor-blob': 'Watercolor',
+  'angkor-wat-silhouette': 'Angkor Wat',
 }
 
 const motifComponents = computed(() =>
@@ -66,10 +70,18 @@ const motifComponents = computed(() =>
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: 4.75rem;
   height: 1.5rem;
+  overflow: hidden;
 }
-.motif-preview-svg {
-  height: 1.25rem;
-  width: auto;
+
+.motif-preview :deep(svg) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
 }
 </style>

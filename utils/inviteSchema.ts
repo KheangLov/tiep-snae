@@ -48,6 +48,14 @@ export const inviteDataSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   templateId: z.string(),
+  layoutId: z.enum([
+    'classic-portrait',
+    'hero-split',
+    'timeline-scroll',
+    'card-stack',
+    'cinematic-scroll',
+    'story-album',
+  ]).optional(),
   language: z.enum(['km', 'en', 'bilingual']),
   couple: z.object({
     partnerAName: z.string(),

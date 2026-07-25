@@ -17,6 +17,7 @@ export function createEmptyInvite(templateId: string, language?: InviteLanguage)
     createdAt: now,
     updatedAt: now,
     templateId: template.id,
+    layoutId: template.layout,
     language: language ?? (template.category === 'khmer' ? 'bilingual' : 'en'),
     couple: { partnerAName: '', partnerBName: '' },
     hosts: [],

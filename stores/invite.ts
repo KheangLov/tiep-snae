@@ -20,6 +20,8 @@ import type {
 
 type RepeatableEntry = HostEntry | CeremonyEvent | GuestEntry
 import type { InviteThemeTokens } from '~/templates/theme/tokens'
+import type { InviteLayoutShellId } from '~/types/template'
+import { getTemplateById } from '~/templates'
 import { loadInviteFromStorage, persistInviteToStorage } from '~/utils/inviteStorage'
 import { useInviteListStore } from '~/stores/inviteList'
 import { normalizeHostedAssetUrl } from '~/utils/assetUrl'
@@ -127,7 +129,12 @@ export const useInviteStore = defineStore('invite', () => {
     if (invite.value) invite.value.language = language
   }
   function setTemplate(templateId: string) {
-    if (invite.value) invite.value.templateId = templateId
+    if (!invite.value) return
+    invite.value.templateId = templateId
+    invite.value.layoutId = getTemplateById(templateId)?.layout
+  }
+  function updateLayout(layoutId: InviteLayoutShellId) {
+    if (invite.value) invite.value.layoutId = layoutId
   }
   function setHeroPhoto(url: string | undefined) {
     if (invite.value) invite.value.heroPhoto = url ? normalizeHostedAssetUrl(url, 'image') ?? undefined : undefined
@@ -220,6 +227,7 @@ export const useInviteStore = defineStore('invite', () => {
     updateTheme,
     setLanguage,
     setTemplate,
+    updateLayout,
     setHeroPhoto,
     updateBackgroundImage,
     updateGiftQr,
