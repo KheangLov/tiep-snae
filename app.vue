@@ -2,9 +2,8 @@
 import { COLOR_MODE_STORAGE_KEY } from '~/composables/useColorMode'
 
 // Runs synchronously in <head>, before the SSR body is parsed or painted.
-// The server cannot read browser-owned localStorage or the OS color scheme,
-// so CSS uses this data attribute to render the light-themed SSR markup with
-// dark tokens until Vuetify takes over during hydration.
+// SSR always uses the stable Khmer/light defaults; this script only avoids a
+// theme flash before the saved browser preference is restored after hydration.
 const initialColorModeScript = `(() => {
   let savedMode = null
   try {
@@ -31,6 +30,7 @@ useHead({
 </script>
 
 <template>
+  <NuxtPwaManifest />
   <NuxtLayout>
     <NuxtPage />
   </NuxtLayout>

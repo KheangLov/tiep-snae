@@ -3,9 +3,8 @@ import type { InviteData, InviteLanguage } from '~/types/invite'
 import { DEFAULT_SECTION_ORDER } from '~/types/invite'
 import { getTemplateById, TEMPLATES } from '~/templates'
 
-/** `language` lets a caller (the gallery's per-card Khmer/English toggle,
- * the guided customizer, the AI agent) pin the starting language up front;
- * omitting it falls back to the template's own category, same as before. */
+/** `language` lets a caller pin the starting language up front. New
+ * invitations default to Khmer regardless of visual template category. */
 export function createEmptyInvite(templateId: string, language?: InviteLanguage): InviteData {
   const template = getTemplateById(templateId) ?? TEMPLATES[0]
   const now = new Date().toISOString()
@@ -18,7 +17,7 @@ export function createEmptyInvite(templateId: string, language?: InviteLanguage)
     updatedAt: now,
     templateId: template.id,
     layoutId: template.layout,
-    language: language ?? (template.category === 'khmer' ? 'bilingual' : 'en'),
+    language: language ?? 'km',
     couple: { partnerAName: '', partnerBName: '' },
     hosts: [],
     guests: [],

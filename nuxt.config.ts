@@ -2,22 +2,163 @@ import vuetify from 'vite-plugin-vuetify'
 
 export default defineNuxtConfig({
   compatibilityDate: '2026-07-04',
-  // Every page in this app renders data that only ever exists in the
-  // visitor's own browser (color mode, language, and every invitation --
-  // see stores/invite.ts, composables/useColorMode.ts,
-  // composables/useAppI18n.ts, all backed by localStorage via VueUse's
-  // useStorage). useStorage reads that value synchronously on the client,
-  // which is inherently earlier than Vue's SSR-hydration comparison point --
-  // any SSR render is *guaranteed* to mismatch the client's first render as
-  // soon as a returning visitor has a saved preference. Since this product's
-  // entire premise is "nothing exists outside your browser," there's no SEO
-  // payoff worth chasing that mismatch for: rendering client-only sidesteps
-  // the whole bug class instead of hand-rolling hydration-safe timing for
-  // every localStorage-backed composable.
-  ssr: false,
+  // The public shell and shared invitations render on the server. Private
+  // invitation records and preferences are restored from localStorage only
+  // after hydration, so SSR never reads or receives browser-owned data.
+  ssr: true,
   devtools: { enabled: false },
 
-  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
+  modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss', '@vite-pwa/nuxt'],
+
+  routeRules: {
+    '/_nuxt/**': {
+      headers: { 'cache-control': 'public, max-age=31536000, immutable' },
+    },
+    '/icons/**': {
+      headers: { 'cache-control': 'public, max-age=31536000, immutable' },
+    },
+    '/sw.js': {
+      headers: { 'cache-control': 'no-cache, no-store, must-revalidate' },
+    },
+    '/manifest.webmanifest': {
+      headers: { 'cache-control': 'no-cache, must-revalidate' },
+    },
+  },
+
+  nitro: {
+    prerender: {
+      routes: ['/offline/'],
+    },
+  },
+
+  pwa: {
+    registerType: 'autoUpdate',
+    registerWebManifestInRouteRules: true,
+    includeAssets: [
+      'icons/apple-touch-icon.png',
+      'icons/app-icon-192.png',
+      'icons/app-icon-512.png',
+    ],
+    client: {
+      installPrompt: 'tiep-snae:pwa-install-dismissed',
+      periodicSyncForUpdates: 60 * 60,
+    },
+    manifest: {
+      id: '/',
+      name: 'ធៀបស្នេហ៍',
+      short_name: 'ធៀបស្នេហ៍',
+      description: 'បង្កើតធៀបការឌីជីថលដ៏ស្រស់ស្អាត ឯកជន និងអាចប្រើបានក្រៅបណ្ដាញ។',
+      lang: 'km-KH',
+      start_url: '/',
+      scope: '/',
+      display: 'standalone',
+      orientation: 'any',
+      background_color: '#FFF9F6',
+      theme_color: '#8B2942',
+      categories: ['lifestyle', 'design', 'utilities'],
+      icons: [
+        {
+          src: '/icons/app-icon-192.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'any',
+        },
+        {
+          src: '/icons/app-icon-512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'any',
+        },
+        {
+          src: '/icons/app-icon-512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable',
+        },
+      ],
+    },
+    workbox: {
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+      skipWaiting: true,
+      // This is an SSR app, not a single-page app shell. Each route should
+      // use its server response when online and its own cached response when
+      // offline; unmatched routes fall back to the precached offline page.
+      navigateFallback: null,
+      globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+      additionalManifestEntries: [
+        { url: '/offline/', revision: 'offline-v1' },
+      ],
+      runtimeCaching: [
+        {
+          urlPattern: /^https?:\/\/[^/]+\/(?:$|templates(?:\/|$)|customize(?:\/|$)|editor(?:\/|$)|i(?:\/|$)|settings(?:\/|$)|offline(?:\/|$))/,
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'theap-snae-pages-v1',
+            networkTimeoutSeconds: 3,
+            cacheableResponse: { statuses: [0, 200] },
+            expiration: {
+              maxEntries: 40,
+              maxAgeSeconds: 60 * 60 * 24 * 14,
+            },
+            precacheFallback: { fallbackURL: '/offline/' },
+          },
+        },
+        {
+          urlPattern: /\.(?:avif|gif|jpe?g|png|svg|webp)(?:\?.*)?$/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'theap-snae-images-v1',
+            cacheableResponse: { statuses: [0, 200] },
+            expiration: {
+              maxEntries: 100,
+              maxAgeSeconds: 60 * 60 * 24 * 30,
+              purgeOnQuotaError: true,
+            },
+          },
+        },
+        {
+          urlPattern: /\.(?:aac|flac|m4a|mp3|ogg|wav)(?:\?.*)?$/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'theap-snae-audio-v1',
+            cacheableResponse: { statuses: [0, 200] },
+            expiration: {
+              maxEntries: 12,
+              maxAgeSeconds: 60 * 60 * 24 * 30,
+              purgeOnQuotaError: true,
+            },
+            rangeRequests: true,
+          },
+        },
+        {
+          urlPattern: /\.(?:otf|ttf|woff2?)(?:\?.*)?$/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'theap-snae-fonts-v1',
+            cacheableResponse: { statuses: [0, 200] },
+            expiration: {
+              maxEntries: 80,
+              maxAgeSeconds: 60 * 60 * 24 * 365,
+            },
+          },
+        },
+        {
+          urlPattern: /\.(?:css|js|mjs)(?:\?.*)?$/i,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'theap-snae-assets-v1',
+            cacheableResponse: { statuses: [0, 200] },
+            expiration: {
+              maxEntries: 120,
+              maxAgeSeconds: 60 * 60 * 24 * 30,
+              purgeOnQuotaError: true,
+            },
+          },
+        },
+      ],
+    },
+  },
 
   // Load order matters: Vuetify's base styles first, Tailwind/app styles
   // after, so utility classes win on any specificity tie. Vuetify styling is
@@ -82,10 +223,14 @@ export default defineNuxtConfig({
     // dependency between the two and can't deadlock this way.
     pageTransition: { name: 'page' },
     head: {
-      htmlAttrs: { lang: 'en' },
-      title: 'Tiep Snae — Digital Wedding Invitations',
+      htmlAttrs: { lang: 'km' },
+      title: 'ធៀបស្នេហ៍ — ធៀបការឌីជីថល',
+      link: [
+        { rel: 'icon', type: 'image/png', sizes: '192x192', href: '/icons/app-icon-192.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/icons/apple-touch-icon.png' },
+      ],
       meta: [
-        { name: 'description', content: 'Create a beautiful digital wedding invitation in minutes -- free, private, and entirely in your browser. Nothing you create is ever uploaded or stored on a server.' },
+        { name: 'description', content: 'បង្កើតធៀបការឌីជីថលដ៏ស្រស់ស្អាត ឯកជន និងអាចប្រើបានក្រៅបណ្ដាញ។ ទិន្នន័យរបស់អ្នករក្សាទុកតែក្នុងកម្មវិធីរុករករបស់អ្នក។' },
         { name: 'robots', content: 'index, follow' },
         { name: 'theme-color', content: '#8B2942' },
         { name: 'color-scheme', content: 'light dark' },
@@ -98,7 +243,7 @@ export default defineNuxtConfig({
         // referrerpolicy attribute of its own).
         { name: 'referrer', content: 'no-referrer' },
         { property: 'og:type', content: 'website' },
-        { property: 'og:site_name', content: 'Tiep Snae' },
+        { property: 'og:site_name', content: 'ធៀបស្នេហ៍' },
         { name: 'twitter:card', content: 'summary' },
       ],
     },

@@ -207,6 +207,10 @@ onMounted(() => {
     >
       <v-icon icon="solar:palette-bold" size="22" color="white" />
     </NuxtLink>
+
+    <ClientOnly>
+      <PwaStatusNotice />
+    </ClientOnly>
   </v-app>
 </template>
 

@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { clearLocalUserData, readLocalDataSummary, type LocalDataSummary } from '~/utils/privacyStorage'
 import { useAppI18n } from '~/composables/useAppI18n'
 
 const { t } = useAppI18n()
 const open = ref(false)
 const deleteConfirmOpen = ref(false)
-const summary = ref<LocalDataSummary>(readLocalDataSummary())
+const summary = ref<LocalDataSummary>({ inviteCount: 0, apiKeyStored: false, bytesUsed: 0 })
+
+onMounted(() => {
+  summary.value = readLocalDataSummary()
+})
 
 watch(open, (isOpen) => {
   if (isOpen) summary.value = readLocalDataSummary()

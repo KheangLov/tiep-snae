@@ -1,19 +1,39 @@
-import { useStorage } from '@vueuse/core'
+import { onMounted, watch } from 'vue'
 import { appStoragePrefix } from '~/utils/storageKeys'
 
 export type ColorMode = 'light' | 'dark'
 
 export const COLOR_MODE_STORAGE_KEY = `${appStoragePrefix}:color-mode`
 
-// Module-scoped singleton: two independent useStorage() calls wouldn't see
-// each other's writes within the same tab. `null` means "no explicit choice
-// yet, follow the OS setting"; once the user toggles it, an explicit
-// 'light'/'dark' is stored and wins over the OS setting from then on.
-let modeRef: ReturnType<typeof useStorage<ColorMode | null>> | null = null
-
 export function useColorMode() {
-  if (!modeRef) {
-    modeRef = useStorage<ColorMode | null>(COLOR_MODE_STORAGE_KEY, null)
+  // Keep the SSR and hydration value stable, then restore the browser-only
+  // preference once Vue has mounted. `null` means follow the OS setting.
+  const mode = useState<ColorMode | null>('app-color-mode', () => null)
+  const restored = useState<boolean>('app-color-mode-restored', () => false)
+
+  if (import.meta.client) {
+    onMounted(() => {
+      if (restored.value) return
+      try {
+        const saved = window.localStorage.getItem(COLOR_MODE_STORAGE_KEY)
+        if (saved === 'light' || saved === 'dark') mode.value = saved
+      } catch {
+        // Keep following the OS setting when storage is unavailable.
+      } finally {
+        restored.value = true
+      }
+    })
+
+    watch(mode, (nextMode) => {
+      if (!restored.value) return
+      try {
+        if (nextMode) window.localStorage.setItem(COLOR_MODE_STORAGE_KEY, nextMode)
+        else window.localStorage.removeItem(COLOR_MODE_STORAGE_KEY)
+      } catch {
+        // The in-memory choice still works for the current session.
+      }
+    })
   }
-  return modeRef
+
+  return mode
 }

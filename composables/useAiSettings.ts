@@ -1,4 +1,4 @@
-import { useStorage } from '@vueuse/core'
+import { onMounted, watch } from 'vue'
 import { appStoragePrefix } from '~/utils/storageKeys'
 import type { AiProviderId } from '~/types/ai'
 
@@ -18,14 +18,37 @@ const DEFAULT_SETTINGS: AiSettings = {
   baseUrl: '',
 }
 
-// Module-scoped singleton -- same reasoning as useColorMode.ts: two
-// independent useStorage() calls wouldn't see each other's writes within
-// the same tab.
-let settingsRef: ReturnType<typeof useStorage<AiSettings>> | null = null
-
 export function useAiSettings() {
-  if (!settingsRef) {
-    settingsRef = useStorage<AiSettings>(AI_SETTINGS_STORAGE_KEY, { ...DEFAULT_SETTINGS })
+  const settings = useState<AiSettings>('ai-settings', () => ({ ...DEFAULT_SETTINGS }))
+  const restored = useState<boolean>('ai-settings-restored', () => false)
+
+  if (import.meta.client) {
+    onMounted(() => {
+      if (restored.value) return
+      try {
+        const saved = JSON.parse(window.localStorage.getItem(AI_SETTINGS_STORAGE_KEY) ?? '{}') as Partial<AiSettings>
+        settings.value = {
+          provider: typeof saved.provider === 'string' ? saved.provider as AiProviderId : DEFAULT_SETTINGS.provider,
+          apiKey: typeof saved.apiKey === 'string' ? saved.apiKey : '',
+          model: typeof saved.model === 'string' ? saved.model : DEFAULT_SETTINGS.model,
+          baseUrl: typeof saved.baseUrl === 'string' ? saved.baseUrl : '',
+        }
+      } catch {
+        settings.value = { ...DEFAULT_SETTINGS }
+      } finally {
+        restored.value = true
+      }
+    })
+
+    watch(settings, (nextSettings) => {
+      if (!restored.value) return
+      try {
+        window.localStorage.setItem(AI_SETTINGS_STORAGE_KEY, JSON.stringify(nextSettings))
+      } catch {
+        // The settings still work for the current session.
+      }
+    }, { deep: true })
   }
-  return settingsRef
+
+  return settings
 }

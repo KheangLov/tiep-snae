@@ -9,8 +9,30 @@ import TemplateRenderer from '~/components/invite/TemplateRenderer.vue'
 import type { InviteData } from '~/types/invite'
 
 const route = useRoute()
-const invite = ref<InviteData | null>(null)
-const checked = ref(false)
+const encodedShareData = typeof route.query.d === 'string' ? route.query.d : ''
+
+function shortPayloadHash(value: string): string {
+  let hash = 2166136261
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index)
+    hash = Math.imul(hash, 16777619)
+  }
+  return (hash >>> 0).toString(36)
+}
+
+// Shared links contain their whole invitation payload in the URL, so they
+// can render during SSR without reading private browser storage. Nuxt
+// serializes this result into the hydration payload to keep both renders
+// identical.
+const { data: sharedResult } = await useAsyncData(
+  `shared-invite:${String(route.params.inviteId)}:${shortPayloadHash(encodedShareData)}`,
+  async () => ({
+    invite: encodedShareData ? await decodeShareData(encodedShareData) : null,
+  }),
+)
+
+const invite = ref<InviteData | null>(sharedResult.value?.invite ?? null)
+const checked = ref(Boolean(encodedShareData))
 
 // The one piece of a shared link that's genuinely per-recipient -- see
 // composables/useShareLink.ts for why it's a plain query param instead of
@@ -30,14 +52,17 @@ onMounted(async () => {
   // previewing/re-sharing their own draft resolves from localStorage.
   // Priority order matters: a `?d=` link should render even if a stale
   // localStorage record with the same id happens to exist on this device.
-  const sharedData = route.query.d
-  if (typeof sharedData === 'string' && sharedData) {
-    invite.value = await decodeShareData(sharedData)
-  }
   if (!invite.value) {
     invite.value = loadInviteFromStorage(String(route.params.inviteId))
   }
   checked.value = true
+})
+
+useSeoMeta({
+  title: () => invite.value
+    ? `${invite.value.couple.partnerAName || 'ធៀបការ'} & ${invite.value.couple.partnerBName || 'ស្នេហ៍'} — ធៀបស្នេហ៍`
+    : 'ធៀបស្នេហ៍',
+  description: 'ធៀបការឌីជីថលសម្រាប់ថ្ងៃពិសេស។',
 })
 </script>
 

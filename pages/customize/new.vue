@@ -80,7 +80,7 @@ const filteredTemplates = computed(() => {
 
 const previewInvite = computed(() => {
   if (!templateId.value) return null
-  const invite = createSampleInvite(templateId.value)
+  const invite = createSampleInvite(templateId.value, 'km')
   invite.layoutId = layoutId.value
   invite.themeTokens = {
     ...invite.themeTokens,

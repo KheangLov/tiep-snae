@@ -32,9 +32,9 @@ const filtered = computed(() => TEMPLATES.filter((tpl) => {
 // Every template can be previewed and started in either language,
 // independent of its own category -- a Khmer-heritage template isn't
 // locked to Khmer content, and vice versa. Each card remembers its own
-// choice, defaulting to the template's category.
+// choice, defaulting to Khmer across every visual category.
 const cardLanguage = ref<Record<string, SampleLanguage>>(
-  Object.fromEntries(TEMPLATES.map((tpl) => [tpl.id, tpl.category === 'khmer' ? 'km' : 'en'])),
+  Object.fromEntries(TEMPLATES.map((tpl) => [tpl.id, 'km'])),
 )
 
 function setCardLanguage(templateId: string, language: SampleLanguage) {

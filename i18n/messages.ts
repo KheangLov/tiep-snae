@@ -11,7 +11,7 @@ type MessageDict = Record<string, string>
 
 export const messages: Record<AppLocale, MessageDict> = {
   en: {
-    'app.name': 'Tiep Snae',
+    'app.name': 'ធៀបស្នេហ៍',
     'app.tagline': 'Digital wedding invitations, entirely private',
 
     'nav.templates': 'Templates',
@@ -26,6 +26,17 @@ export const messages: Record<AppLocale, MessageDict> = {
 
     'common.close': 'Close',
     'common.cancel': 'Cancel',
+
+    'pwa.installTitle': 'Install ធៀបស្នេហ៍',
+    'pwa.installBody': 'Keep the invitation designer on your home screen and use it offline.',
+    'pwa.install': 'Install',
+    'pwa.updateTitle': 'A new version is ready',
+    'pwa.updateBody': 'Reload to use the latest improvements.',
+    'pwa.update': 'Reload',
+    'pwa.offlineReadyTitle': 'Ready for offline use',
+    'pwa.offlineReadyBody': 'The app is now saved on this device.',
+    'pwa.offlineTitle': 'You are offline',
+    'pwa.offlineBody': 'Saved designs and previously opened pages remain available.',
 
     'privacy.open': 'Privacy',
     'privacy.short': 'Private',
@@ -51,7 +62,7 @@ export const messages: Record<AppLocale, MessageDict> = {
     'privacy.deleteConfirm': 'Delete everything',
   },
   km: {
-    'app.name': 'Tiep Snae',
+    'app.name': 'ធៀបស្នេហ៍',
     'app.tagline': 'សំបុត្រអញ្ជើញអាពាហ៍ពិពាហ៍ឌីជីថល ជាឯកជនទាំងស្រុង',
 
     'nav.templates': 'ពុម្ព',
@@ -66,6 +77,17 @@ export const messages: Record<AppLocale, MessageDict> = {
 
     'common.close': 'បិទ',
     'common.cancel': 'ច្រានចោល',
+
+    'pwa.installTitle': 'ដំឡើង ធៀបស្នេហ៍',
+    'pwa.installBody': 'រក្សាទុកកម្មវិធីនៅលើអេក្រង់ដើម និងប្រើប្រាស់បានក្រៅបណ្ដាញ។',
+    'pwa.install': 'ដំឡើង',
+    'pwa.updateTitle': 'មានកំណែថ្មី',
+    'pwa.updateBody': 'ផ្ទុកឡើងវិញ ដើម្បីប្រើមុខងារថ្មីបំផុត។',
+    'pwa.update': 'ផ្ទុកឡើងវិញ',
+    'pwa.offlineReadyTitle': 'រួចរាល់សម្រាប់ប្រើក្រៅបណ្ដាញ',
+    'pwa.offlineReadyBody': 'កម្មវិធីត្រូវបានរក្សាទុកលើឧបករណ៍នេះហើយ។',
+    'pwa.offlineTitle': 'អ្នកកំពុងនៅក្រៅបណ្ដាញ',
+    'pwa.offlineBody': 'ការរចនាដែលបានរក្សាទុក និងទំព័រដែលធ្លាប់បើក នៅតែអាចប្រើបាន។',
 
     'privacy.open': 'ភាពឯកជន',
     'privacy.short': 'ឯកជន',
