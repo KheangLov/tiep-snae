@@ -203,6 +203,7 @@ onMounted(() => {
     <NuxtLink
       v-if="showCustomizeFab"
       to="/customize/new"
+      no-prefetch
       class="create-own-fab"
       :aria-label="t('nav.createNew')"
     >

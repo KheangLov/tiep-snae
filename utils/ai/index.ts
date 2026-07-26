@@ -1,5 +1,6 @@
 import type { AiProvider, AiProviderId } from '~/types/ai'
 import { anthropicProvider } from './anthropicProvider'
+import { geminiProvider } from './geminiProvider'
 import { createOpenAiCompatibleProvider } from './openaiCompatibleProvider'
 
 const openaiProvider = createOpenAiCompatibleProvider({
@@ -25,6 +26,7 @@ const ollamaProvider = createOpenAiCompatibleProvider({
 
 export const AI_PROVIDERS: Record<AiProviderId, AiProvider> = {
   anthropic: anthropicProvider,
+  gemini: geminiProvider,
   openai: openaiProvider,
   deepseek: deepseekProvider,
   ollama: ollamaProvider,

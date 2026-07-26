@@ -13,8 +13,8 @@
    `.v-application` -- never the invitation render tree, which uses its own
    tokens above and Tailwind classes, not these. */
 :root {
-  --app-font-body: 'Noto Sans Khmer', system-ui, sans-serif;
-  --app-font-display: 'Noto Sans Khmer', system-ui, sans-serif;
+  --app-font-body: system-ui, sans-serif;
+  --app-font-display: system-ui, sans-serif;
 
   /* One consistent radius scale instead of ad hoc per-component values. */
   --radius-sm: 0.625rem;
@@ -106,6 +106,19 @@ html[data-app-theme='dark'] {
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+/* Keep every scroll surface usable with a wheel, trackpad, touch, keyboard,
+   and programmatic scrolling while hiding the browser's scrollbar chrome. */
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 html,
@@ -234,11 +247,11 @@ html[data-app-theme='dark'] .v-application::before {
   --os-handle-bg-active: var(--scrollbar-handle-active);
 }
 
-/* Noto Sans Khmer keeps the Khmer-first app chrome consistent and readable;
-   Latin text uses the system UI fallback without another font download.
-   Vuetify's compiled `text-*` helpers explicitly name Roboto, so each helper
-   used by the app is overridden here with one extra class of specificity. No
-   `!important`: invitation font variables retain priority in previews. */
+/* The operating system's UI font keeps the Khmer-first app chrome fast and
+   familiar on every platform. Invitation previews retain their explicit
+   template fonts. Vuetify's compiled `text-*` helpers explicitly name Roboto,
+   so each helper used by the app is overridden here with one extra class of
+   specificity. No `!important`: invitation font variables retain priority. */
 html,
 body {
   font-family: var(--app-font-body);

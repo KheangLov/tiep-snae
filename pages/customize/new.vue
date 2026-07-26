@@ -858,25 +858,6 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 .studio-scroll-area {
   overflow: auto;
   overscroll-behavior: contain;
-  scrollbar-color: var(--scrollbar-handle) transparent;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-}
-.studio-scroll-area::-webkit-scrollbar {
-  width: 0.7rem;
-  height: 0.7rem;
-}
-.studio-scroll-area::-webkit-scrollbar-track {
-  background: transparent;
-}
-.studio-scroll-area::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-handle);
-  background-clip: padding-box;
-  border: 0.18rem solid transparent;
-  border-radius: 999px;
-}
-.studio-scroll-area::-webkit-scrollbar-thumb:hover {
-  background-color: var(--scrollbar-handle-hover);
 }
 .studio-controls__footer {
   display: flex;

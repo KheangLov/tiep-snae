@@ -1,4 +1,4 @@
-export type AiProviderId = 'anthropic' | 'openai' | 'deepseek' | 'ollama'
+export type AiProviderId = 'anthropic' | 'gemini' | 'openai' | 'deepseek' | 'ollama'
 
 export interface AiMessage {
   role: 'user' | 'assistant'

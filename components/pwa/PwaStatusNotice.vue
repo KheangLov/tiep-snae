@@ -187,7 +187,9 @@ onUnmounted(() => {
 .pwa-status-notice__action {
   padding: 0.5rem 0.85rem;
   color: white;
-  background: rgb(var(--v-theme-primary, 139 41 66));
+  /* Keep white text accessible in both themes; the dark Vuetify primary is a
+     pale pink intended for text, not a button background. */
+  background: #8b2942;
 }
 
 .pwa-status-notice__close {

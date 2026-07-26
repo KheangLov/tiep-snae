@@ -8,6 +8,11 @@ const settings = useAiSettings()
 
 const providerOptions = Object.values(AI_PROVIDERS).map((p) => ({ title: p.label, value: p.id }))
 const currentProvider = computed(() => AI_PROVIDERS[settings.value.provider])
+const apiKeyLabel = computed(() => {
+  if (settings.value.provider === 'ollama') return 'API key (usually not needed)'
+  if (settings.value.provider === 'gemini') return 'Gemini API key'
+  return 'API key'
+})
 
 function onProviderChange(id: AiProviderId) {
   settings.value.provider = id
@@ -34,11 +39,21 @@ function onProviderChange(id: AiProviderId) {
       />
       <v-text-field
         v-model="settings.apiKey"
-        :label="settings.provider === 'ollama' ? 'API key (usually not needed)' : 'API key'"
+        :label="apiKeyLabel"
         type="password"
         autocomplete="off"
         class="mb-3"
       />
+      <v-alert
+        v-if="settings.provider === 'gemini'"
+        type="info"
+        variant="tonal"
+        density="compact"
+        class="mb-3"
+      >
+        Uses the Gemini API directly from this browser. Your key is stored only on this device and is
+        sent to Google only when you use an AI feature.
+      </v-alert>
       <v-combobox
         v-model="settings.model"
         :items="currentProvider.defaultModels"

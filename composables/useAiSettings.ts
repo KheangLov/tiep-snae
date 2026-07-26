@@ -18,6 +18,14 @@ const DEFAULT_SETTINGS: AiSettings = {
   baseUrl: '',
 }
 
+function isAiProviderId(value: unknown): value is AiProviderId {
+  return value === 'anthropic'
+    || value === 'gemini'
+    || value === 'openai'
+    || value === 'deepseek'
+    || value === 'ollama'
+}
+
 export function useAiSettings() {
   const settings = useState<AiSettings>('ai-settings', () => ({ ...DEFAULT_SETTINGS }))
   const restored = useState<boolean>('ai-settings-restored', () => false)
@@ -28,7 +36,7 @@ export function useAiSettings() {
       try {
         const saved = JSON.parse(window.localStorage.getItem(AI_SETTINGS_STORAGE_KEY) ?? '{}') as Partial<AiSettings>
         settings.value = {
-          provider: typeof saved.provider === 'string' ? saved.provider as AiProviderId : DEFAULT_SETTINGS.provider,
+          provider: isAiProviderId(saved.provider) ? saved.provider : DEFAULT_SETTINGS.provider,
           apiKey: typeof saved.apiKey === 'string' ? saved.apiKey : '',
           model: typeof saved.model === 'string' ? saved.model : DEFAULT_SETTINGS.model,
           baseUrl: typeof saved.baseUrl === 'string' ? saved.baseUrl : '',
